@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadCategories = exports.deleteAllCategories = exports.updateCategory = exports.deleteCategory = exports.getAllCategories = exports.newCategory = void 0;
+exports.deleteCategoryById = exports.getCategoryById = exports.loadCategories = exports.deleteAllCategories = exports.updateCategory = exports.deleteCategory = exports.getAllCategories = exports.newCategory = void 0;
 const Categories_model_1 = __importDefault(require("../models/Categories.model"));
 // Create a new category
 const newCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -31,6 +31,11 @@ exports.newCategory = newCategory;
 // Get all categories
 const getAllCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const categories = yield Categories_model_1.default.find({});
+        if (!categories) {
+            res.status(404).json({ message: 'Categories not found' });
+        }
+        res.status(200).json({ message: 'Categories: ', categories });
     }
     catch (error) {
         console.log('Error getting categories', error);
@@ -42,6 +47,21 @@ exports.getAllCategories = getAllCategories;
 const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.deleteCategory = deleteCategory;
+const deleteCategoryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const deletedCategory = yield Categories_model_1.default.findByIdAndDelete(id);
+        if (!deletedCategory) {
+            res.status(404).json({ message: "este id no existe" });
+        }
+        res.status(200).json(deletedCategory);
+    }
+    catch (error) {
+        console.log('error', error);
+        res.status(500).json(error);
+    }
+});
+exports.deleteCategoryById = deleteCategoryById;
 // Update a category
 const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -60,6 +80,20 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.updateCategory = updateCategory;
+const getCategoryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const selectedCategory = yield Categories_model_1.default.findById(id);
+        if (!selectedCategory) {
+            res.status(404).json({ message: `No encontra categoria con id: ${id}` });
+        }
+        res.status(200).json(selectedCategory);
+    }
+    catch (error) {
+        res.status(500).json(error);
+    }
+});
+exports.getCategoryById = getCategoryById;
 // delelte all categories
 const deleteAllCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

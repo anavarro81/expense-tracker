@@ -1,13 +1,17 @@
 import express  from "express";
-import {newCategory, getAllCategories, deleteCategory, updateCategory, deleteAllCategories, loadCategories} from "../controllers/Categories.controller";
+import {newCategory, getAllCategories, deleteCategory, updateCategory, deleteAllCategories, loadCategories, getCategoryById, deleteCategoryById} from "../controllers/Categories.controller";
 
 const categoriesRoute = express.Router();
 
-console.log('Categories route loaded...');
+
 
 
 categoriesRoute.post('/', newCategory)
 categoriesRoute.post('/load-categories', loadCategories)
+categoriesRoute.get('/', getAllCategories)
+categoriesRoute.get('/:id', getCategoryById)
+categoriesRoute.delete('/:id', deleteCategoryById)
 
 
-export default categoriesRoute;
+
+export default categoriesRoute; 

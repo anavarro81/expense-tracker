@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import CategoryModel from '../models/Categories.model';
-import { get } from 'http';
+
 
 // Create a new category
 const newCategory = async (req: Request, res: Response): Promise<void>  => {
@@ -20,6 +20,13 @@ const newCategory = async (req: Request, res: Response): Promise<void>  => {
 // Get all categories
 const getAllCategories = async (req: Request, res: Response): Promise<void> => {
     try {
+
+        const categories = await CategoryModel.find({});
+        if (!categories) {
+            res.status(404).json({ message: 'Categories not found' });
+        }
+
+        res.status(200).json({ message: 'Categories: ', categories });
         
     } catch (error) {
         console.log('Error getting categories', error);
@@ -32,6 +39,22 @@ const getAllCategories = async (req: Request, res: Response): Promise<void> => {
 const deleteCategory = async (req: Request, res: Response): Promise<void> => {
 
 }
+
+const deleteCategoryById = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const {id} = req.params;
+        const deletedCategory = await CategoryModel.findByIdAndDelete(id)
+        if (!deletedCategory) {
+            res.status(404).json({message:"este id no existe"})
+        }
+            res.status(200).json(deletedCategory);
+      } catch (error) {
+        console.log('error', error)
+        res.status(500).json(error)
+      }
+  
+}
+
 
 // Update a category
 const updateCategory = async (req: Request, res: Response): Promise<void> => {
@@ -55,6 +78,20 @@ const updateCategory = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({ message: 'Error updating category', error });    
     }
 }
+
+const getCategoryById = async (req: Request, res: Response): Promise<void> => {
+    try {    
+        const { id } = req.params;
+        const selectedCategory = await CategoryModel.findById(id)
+        if (!selectedCategory) {
+          res.status(404).json({message: `No encontra categoria con id: ${id}` })          
+        }    
+        res.status(200).json(selectedCategory)          
+      } catch (error) {
+            res.status(500).json(error);    
+      }
+    }
+
 
 // delelte all categories
 const deleteAllCategories = async (req: Request, res: Response): Promise<void> => {    
@@ -89,5 +126,5 @@ const loadCategories = async (req: Request, res: Response): Promise<void> => {
 }
 
 
-export {newCategory, getAllCategories, deleteCategory, updateCategory, deleteAllCategories, loadCategories};
+export {newCategory, getAllCategories, deleteCategory, updateCategory, deleteAllCategories, loadCategories, getCategoryById, deleteCategoryById};
 

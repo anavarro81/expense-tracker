@@ -4,7 +4,7 @@ const mongoose_1 = require("mongoose");
 // Existen categorias por defecto y categorias personalizadas
 // Las categorias personalizadas tendrán un userId asociado
 const CategorySchema = new mongoose_1.Schema({
-    name: { type: String, required: true },
+    name: { type: String, required: true, unique: true, trim: true },
     description: { type: String, required: false },
     type: { type: String, required: true, enum: ['default', 'custom'] },
     userId: { type: mongoose_1.Schema.Types.ObjectId, required: false, default: null },
