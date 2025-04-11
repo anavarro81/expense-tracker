@@ -12,26 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectDB = void 0;
-const mongoose_1 = __importDefault(require("mongoose"));
-const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    if (!process.env.BD_URI) {
-        console.log('No se ha encontrad URI de conexión a BBDD');
-        process.exit(1);
-    }
+exports.newTransation = void 0;
+const transations_model_1 = __importDefault(require("../models/transations.model"));
+const newTransation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { connection } = yield mongoose_1.default.connect(process.env.BD_URI);
-        const url = `${connection.host}: ${connection.port}`;
-        console.log('Base de datos conectada: ', url);
+        const rewTransations = new transations_model_1.default(req.body);
+        const savedTransation = yield rewTransations.save();
+        res.status(201).json(savedTransation);
     }
     catch (error) {
-        if (error instanceof Error) {
-            console.log('Error al conectar a la base de datos ', error.message);
-        }
-        else {
-            console.log('Error desconocido al conectar a la base de datos ', error);
-        }
-        process.exit(1);
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
-exports.connectDB = connectDB;
+exports.newTransation = newTransation;

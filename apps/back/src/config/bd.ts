@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export const connectDB = async () => {
 
-    console.log('entro en connectDB')
+    
 
     if (!process.env.BD_URI) {
         console.log('No se ha encontrad URI de conexión a BBDD')
