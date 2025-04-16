@@ -1,24 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const transationsSchema = new mongoose_1.Schema({
-    type: { type: String,
-        required: true,
-        enum: ['ingreso', 'gasto']
-    },
-    percentaje: { type: Number, required: false },
-    // La categoria debe ser de la coleccion de categorias
-    category: { type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'Category',
-        required: true
-    },
-    description: { type: String, required: false },
+const TransactionSchema = new mongoose_1.Schema({
+    name: { type: String, required: true },
+    type: { type: String, required: true, enum: ["Ingreso", "Gasto"] },
+    percentage: { type: Number },
+    category: { type: String, required: true },
+    notes: { type: String },
     amount: { type: Number, required: true },
-    date: { type: Date, required: true },
-    Currency: { type: String, required: true },
-    user: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true }
+    date: { type: Date },
+    currency: { type: String, required: true },
 }, {
-    timestamps: true
+    timestamps: true,
 });
-const Transations = (0, mongoose_1.model)('Transations', transationsSchema);
-exports.default = Transations;
+const TransactionModel = (0, mongoose_1.model)("Transaction", TransactionSchema);
+exports.default = TransactionModel;

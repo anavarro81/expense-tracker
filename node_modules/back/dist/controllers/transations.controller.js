@@ -12,17 +12,74 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newTransation = void 0;
+exports.loadTransations = exports.deleteTransactionById = exports.getTransaction = exports.getAllTransactions = exports.newTransaction = void 0;
 const transations_model_1 = __importDefault(require("../models/transations.model"));
-const newTransation = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const newTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const rewTransations = new transations_model_1.default(req.body);
-        const savedTransation = yield rewTransations.save();
-        res.status(201).json(savedTransation);
+        const newTransaction = new transations_model_1.default(req.body);
+        yield newTransaction.save();
+        res.status(201).json({ message: 'Transaction created successfully', newTransaction });
     }
     catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        console.log('Error creating Transaction', error);
+        res.status(500).json({ message: 'Error creating Transaction', error });
     }
 });
-exports.newTransation = newTransation;
+exports.newTransaction = newTransaction;
+const getAllTransactions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const transactions = yield transations_model_1.default.find({});
+        if (!transactions) {
+            res.status(404).json({ message: 'Transactions not found' });
+        }
+        res.status(200).json({ message: 'Transactions: ', transactions });
+    }
+    catch (error) {
+        console.log('Error getting Transactions', error);
+        res.status(500).json({ message: 'Error getting Transactions', error });
+    }
+});
+exports.getAllTransactions = getAllTransactions;
+const getTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const selectedTransaction = yield transations_model_1.default.findById(id);
+        if (!selectedTransaction) {
+            res.status(404).json({ message: `No se encontró Transaction con id: ${id}` });
+        }
+        res.status(200).json(selectedTransaction);
+    }
+    catch (error) {
+        res.status(500).json(error);
+    }
+});
+exports.getTransaction = getTransaction;
+const deleteTransactionById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const deletedTransaction = yield transations_model_1.default.findByIdAndDelete(id);
+        if (!deletedTransaction) {
+            res.status(404).json({ message: "este id no existe" });
+        }
+        res.status(200).json(deletedTransaction);
+    }
+    catch (error) {
+        console.log('error', error);
+        res.status(500).json(error);
+    }
+});
+exports.deleteTransactionById = deleteTransactionById;
+const loadTransations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const insertedTransation = yield transations_model_1.default.insertMany(req.body);
+        if (!insertedTransation) {
+            res.status(404).json({ message: 'Transactions not found' });
+        }
+        res.status(201).json({ message: 'Transactions: ', insertedTransation });
+    }
+    catch (error) {
+        console.error('Error inserting transactions:', error);
+        res.status(500).json({ message: 'Error inserting transactions', error });
+    }
+});
+exports.loadTransations = loadTransations;

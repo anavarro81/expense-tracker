@@ -1,13 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-// Existen categorias por defecto y categorias personalizadas
-// Las categorias personalizadas tendrán un userId asociado
 const CategorySchema = new mongoose_1.Schema({
-    name: { type: String, required: true, unique: true, trim: true },
-    description: { type: String, required: false },
-    type: { type: String, required: true, enum: ['default', 'custom'] },
-    userId: { type: mongoose_1.Schema.Types.ObjectId, required: false, default: null },
+    name: { type: String, required: true },
+    description: { type: String },
+    type: { type: String, enum: ['default', 'custom'], required: true },
+    userId: { type: mongoose_1.Schema.Types.ObjectId, default: null, ref: 'User' }
 }, {
     timestamps: true,
 });

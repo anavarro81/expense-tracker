@@ -1,7 +1,13 @@
-import express from 'express';
-import {newTransation} from '../controllers/transations.controller';
-const transationsRouter = express.Router();
+import express from "express";
+import { newTransaction, getAllTransactions, getTransaction, deleteTransactionById, loadTransations } from "../controllers/transations.controller";
 
-transationsRouter.post('/new-transation', newTransation);
+const transactionsRoute = express.Router();
 
-export default transationsRouter;
+transactionsRoute.post("/", newTransaction);
+transactionsRoute.post("/load-transations", loadTransations);
+transactionsRoute.get("/", getAllTransactions);
+transactionsRoute.get("/:id", getTransaction);
+transactionsRoute.delete("/:id", deleteTransactionById);
+
+
+export default transactionsRoute;

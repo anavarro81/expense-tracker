@@ -1,40 +1,28 @@
-import mongoose, {Schema, model, Document} from "mongoose";
+import mongoose, { Schema, Document, model } from "mongoose";
 
-export interface iTransations{
-    type: string;
-    percentaje: number;
+export interface ITransaction extends Document {
+    name: string;
+    type: "Ingreso" | "Gasto";
+    percentage?: number;
     category: string;
-    description: string;
+    notes?: string;
     amount: number;
-    date: Date;
-    Currency: string;
-    user: string;
+    date?: Date;
+    currency: string;
 }
 
-const transationsSchema = new Schema({
-    type: 
-        {type: String, 
-        required: true,
-        enum: ['ingreso', 'gasto']
-        }, 
-
-    percentaje: {type: Number, required: false},
-    // La categoria debe ser de la coleccion de categorias
-    category: 
-        {type: Schema.Types.ObjectId,
-        ref: 'Category', 
-        required: true
-        },  
-    description: {type: String, required: false},
-    amount: {type: Number, required: true},
-    date: {type: Date, required: true},
-    Currency: {type: String, required: true},
-    user: {type: Schema.Types.ObjectId, ref: 'User', required: true}
+const TransactionSchema = new Schema<ITransaction>({
+    name: { type: String, required: true },
+    type: { type: String, required: true, enum: ["Ingreso", "Gasto"] },
+    percentage: { type: Number },
+    category: { type: String, required: true },
+    notes: { type: String },
+    amount: { type: Number, required: true },
+    date: { type: Date },
+    currency: { type: String, required: true },
 }, {
-    timestamps: true
-})
+    timestamps: true,
+});
 
-const Transations = model<iTransations >('Transations', transationsSchema)
-
-export default Transations
-
+const TransactionModel = model<ITransaction>("Transaction", TransactionSchema);
+export default TransactionModel;

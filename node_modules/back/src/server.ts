@@ -1,9 +1,9 @@
 import express from "express";
 import 'dotenv/config'
 import {connectDB} from './config/bd'
-import transationsRouter from './routes/transations.routers'
 import categoriesRoute from "./routes/Categories.route";
 const app = express();
+import transactionsRoute from './routes/transations.routers'
 
 connectDB()
 
@@ -15,9 +15,8 @@ app.use(express.json())
 
 console.log('Server is running...');
 
-
-app.use('/transations', transationsRouter)
 app.use('/categories', categoriesRoute)
+app.use('/transations', transactionsRoute);
 
 export default app;
 
