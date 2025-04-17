@@ -3,7 +3,7 @@ const fs = require('fs');
 // read the file
 const fileName = process.argv[2];
 
-console.log('>> fileName : ', fileName)
+
 
 
 // create a controller file
