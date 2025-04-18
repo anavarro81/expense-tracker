@@ -14,10 +14,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadTransations = exports.deleteTransactionById = exports.getTransaction = exports.getAllTransactions = exports.newTransaction = void 0;
 const transations_model_1 = __importDefault(require("../models/transations.model"));
+const financial_summary_model_1 = require("../models/financial_summary.model");
+const utils_1 = require("../utils/utils");
 const newTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newTransaction = new transations_model_1.default(req.body);
         yield newTransaction.save();
+        // Como solo hay un registo en la coleccion FinancialSummary, no es necesario filtrar por id se indica {}
+        // upsert: true (insert if not exists) y new: true (return the updated document)
+        // El operador: $inc incrementa el valor de un campo en un documento.
+        const field = newTransaction.type === 'Ingreso' ? 'total_incomes' : 'total_expenses';
+        yield financial_summary_model_1.FinancialSummary.findOneAndUpdate({}, { $inc: { [field]: newTransaction.amount } }, { upsert: true });
         res.status(201).json({ message: 'Transaction created successfully', newTransaction });
     }
     catch (error) {
@@ -60,7 +67,9 @@ const deleteTransactionById = (req, res) => __awaiter(void 0, void 0, void 0, fu
         const deletedTransaction = yield transations_model_1.default.findByIdAndDelete(id);
         if (!deletedTransaction) {
             res.status(404).json({ message: "este id no existe" });
+            return;
         }
+        yield financial_summary_model_1.FinancialSummary.findOneAndUpdate({}, { $inc: { [deletedTransaction.type === 'Ingreso' ? 'total_incomes' : 'total_expenses']: -deletedTransaction.amount } }, { upsert: true, new: true });
         res.status(200).json(deletedTransaction);
     }
     catch (error) {
@@ -71,6 +80,21 @@ const deleteTransactionById = (req, res) => __awaiter(void 0, void 0, void 0, fu
 exports.deleteTransactionById = deleteTransactionById;
 const loadTransations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const transactions = req.body;
+        const { totalIncomes, totalExpenses } = (0, utils_1.calculateTotals)(transactions);
+        // let totalIncomes = 0;
+        // let totalExpenses = 0;
+        // for (const transation of transactions) {
+        //     console.log('transation', transation);
+        //     console.log('importe', transation.amount);
+        //     if (transation.type === 'Ingreso') totalIncomes += transation.amount;
+        //     if (transation.type === 'Gasto')  totalExpenses += transation.amount;
+        // }
+        // console.log('totalIncomes ', totalIncomes);
+        // console.log('totalExpenses ', totalExpenses);
+        yield financial_summary_model_1.FinancialSummary.findOneAndUpdate({}, { $inc: { ['total_incomes']: totalIncomes,
+                ['total_expenses']: totalExpenses }
+        }, { upsert: true, new: true });
         const insertedTransation = yield transations_model_1.default.insertMany(req.body);
         if (!insertedTransation) {
             res.status(404).json({ message: 'Transactions not found' });
