@@ -10,5 +10,6 @@ transactionsRoute.post("/", transations_controller_1.newTransaction);
 transactionsRoute.post("/load-transations", transations_controller_1.loadTransations);
 transactionsRoute.get("/", transations_controller_1.getAllTransactions);
 transactionsRoute.get("/:id", transations_controller_1.getTransaction);
-transactionsRoute.delete("/:id", transations_controller_1.deleteTransactionById);
+transactionsRoute.get("/:id", transations_controller_1.getTransaction);
+transactionsRoute.get("/month/:month", transations_controller_1.getTransactionsByMonth);
 exports.default = transactionsRoute;

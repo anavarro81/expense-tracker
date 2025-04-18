@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadTransations = exports.deleteTransactionById = exports.getTransaction = exports.getAllTransactions = exports.newTransaction = void 0;
+exports.loadTransations = exports.deleteTransactionById = exports.getTransaction = exports.getTransactionsByMonth = exports.getAllTransactions = exports.newTransaction = void 0;
 const transations_model_1 = __importDefault(require("../models/transations.model"));
 const financial_summary_model_1 = require("../models/financial_summary.model");
 const utils_1 = require("../utils/utils");
@@ -47,6 +47,29 @@ const getAllTransactions = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getAllTransactions = getAllTransactions;
+const getTransactionsByMonth = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { month } = req.params;
+        const monthNumber = parseInt(month, 10); // Convertir el mes a un número entero
+        // validar que el mes sea un número entre 1 y 12
+        if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+            res.status(400).json({ message: 'Invalid month' });
+            return;
+        }
+        // Obtiene las transacciones del mes indicado
+        const transactions = yield transations_model_1.default.find({ $expr: {
+                $eq: [{ $month: "$date" }, monthNumber] // Filtrar por el mes
+            }
+        });
+        if (!transactions) {
+            res.status(204).json({ message: 'No se han encontrado operaciones para el mes indicado' });
+        }
+        res.status(200).json({ message: 'Transactions: ', transactions });
+    }
+    catch (error) {
+    }
+});
+exports.getTransactionsByMonth = getTransactionsByMonth;
 const getTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
@@ -82,16 +105,6 @@ const loadTransations = (req, res) => __awaiter(void 0, void 0, void 0, function
     try {
         const transactions = req.body;
         const { totalIncomes, totalExpenses } = (0, utils_1.calculateTotals)(transactions);
-        // let totalIncomes = 0;
-        // let totalExpenses = 0;
-        // for (const transation of transactions) {
-        //     console.log('transation', transation);
-        //     console.log('importe', transation.amount);
-        //     if (transation.type === 'Ingreso') totalIncomes += transation.amount;
-        //     if (transation.type === 'Gasto')  totalExpenses += transation.amount;
-        // }
-        // console.log('totalIncomes ', totalIncomes);
-        // console.log('totalExpenses ', totalExpenses);
         yield financial_summary_model_1.FinancialSummary.findOneAndUpdate({}, { $inc: { ['total_incomes']: totalIncomes,
                 ['total_expenses']: totalExpenses }
         }, { upsert: true, new: true });

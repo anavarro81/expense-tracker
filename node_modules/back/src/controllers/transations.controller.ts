@@ -44,6 +44,41 @@ export const getAllTransactions = async (req: Request, res: Response): Promise<v
     }
 };
 
+export const getTransactionsByMonth = async (req: Request, res: Response): Promise<void> => {
+
+      try {
+
+        const {month} = req.params;
+        const monthNumber = parseInt(month, 10); // Convertir el mes a un número entero
+
+        // validar que el mes sea un número entre 1 y 12
+        if (isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
+            res.status(400).json({ message: 'Invalid month' });
+            return;
+        }
+
+        // Obtiene las transacciones del mes indicado
+        const transactions = await TransactionModel.find(
+            { $expr: {
+                $eq: [{ $month: "$date" }, monthNumber] // Filtrar por el mes
+            }
+        });
+
+        if (!transactions) {
+            res.status(204).json({ message: 'No se han encontrado operaciones para el mes indicado' });
+            
+        }
+
+        res.status(200).json({ message: 'Transactions: ', transactions });
+
+        
+      } catch (error) {
+        
+      }  
+
+}
+
+
 export const getTransaction = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
