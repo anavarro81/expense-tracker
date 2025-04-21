@@ -9,7 +9,7 @@ const transactionsRoute = express_1.default.Router();
 transactionsRoute.post("/", transations_controller_1.newTransaction);
 transactionsRoute.post("/load-transations", transations_controller_1.loadTransations);
 transactionsRoute.get("/", transations_controller_1.getAllTransactions);
-transactionsRoute.get("/:id", transations_controller_1.getTransaction);
-transactionsRoute.get("/:id", transations_controller_1.getTransaction);
+// Se usa el caracter ? para poder validar que no se mande el mes
 transactionsRoute.get("/month/:month", transations_controller_1.getTransactionsByMonth);
+transactionsRoute.get("/:id", transations_controller_1.getTransaction);
 exports.default = transactionsRoute;

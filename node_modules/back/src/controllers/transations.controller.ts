@@ -48,7 +48,17 @@ export const getTransactionsByMonth = async (req: Request, res: Response): Promi
 
       try {
 
+        console.log('getTransactionsByMonth >>');
+        
         const {month} = req.params;
+
+        console.log('month >>', month);
+
+        if (!month) {
+            res.status(400).json({ message: `No se ha informado un mes valido: ${month}` });
+            return;
+        }
+
         const monthNumber = parseInt(month, 10); // Convertir el mes a un número entero
 
         // validar que el mes sea un número entre 1 y 12
@@ -73,7 +83,8 @@ export const getTransactionsByMonth = async (req: Request, res: Response): Promi
 
         
       } catch (error) {
-        
+        console.log('Error obteniendo transacciones', error);
+        res.status(500).json({ message: 'error obteniendo transacciones', error });
       }  
 
 }
