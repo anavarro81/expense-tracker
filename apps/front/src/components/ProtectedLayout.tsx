@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { Children, useState } from 'react'
 import { Navigate } from 'react-router-dom'
+import MainContainer from '../share/MainContainer/MainContainer'
 
 const ProtectedLayout = () => {
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(true)
 
   // Si no está autenticado, redirigir a la página de login
   if (!isAuthenticated) {
@@ -12,7 +13,14 @@ const ProtectedLayout = () => {
   }
 
   return (
-    <div>ProtectedLayout</div>
+    <MainContainer>
+      <> 
+        <h1>Protected Layout</h1>
+        <p>Contenido protegido</p>
+      </>
+    </MainContainer>
+    
+    
   )
 }
 

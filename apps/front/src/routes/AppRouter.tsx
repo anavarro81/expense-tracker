@@ -9,8 +9,8 @@ const AppRouter = () => {
           <Route path="/login" element={<LoginPage/>} />
           <Route path="/register" element={<RegisterPage/>} />    
           <Route element={<ProtectedLayout/>}>
-            <Route path="/dashboard" element={<DashboardPage/>} />
-            <Route path="/movements" element={<MovementsPage/>} />
+            {/* <Route path="/dashboard" element={<DashboardPage/>} /> */}
+            {/* <Route path="/movements" element={<MovementsPage/>} /> */}
           </Route>
         </Routes>
   )
