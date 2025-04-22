@@ -46,13 +46,9 @@ export const getAllTransactions = async (req: Request, res: Response): Promise<v
 
 export const getTransactionsByMonth = async (req: Request, res: Response): Promise<void> => {
 
-      try {
-
-        console.log('getTransactionsByMonth >>');
+      try {        
         
-        const {month} = req.params;
-
-        console.log('month >>', month);
+        const {month} = req.params;        
 
         if (!month) {
             res.status(400).json({ message: `No se ha informado un mes valido: ${month}` });

@@ -49,9 +49,7 @@ const getAllTransactions = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.getAllTransactions = getAllTransactions;
 const getTransactionsByMonth = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log('getTransactionsByMonth >>');
         const { month } = req.params;
-        console.log('month >>', month);
         if (!month) {
             res.status(400).json({ message: `No se ha informado un mes valido: ${month}` });
             return;
