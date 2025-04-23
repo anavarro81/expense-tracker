@@ -1,3 +1,4 @@
+import { parse } from "path";
 
 
 export const calculateTotals = (transactions: any[]) => {
@@ -63,17 +64,18 @@ export const getWeeksInMonth = (month: number, year: number) => {
 
     console.log('weeks: ', weeks);
 
-    // const firstandLastDays: Date[][] = []
-    // currentWeek = [];
+    const firstandLastDays: string[][] = []   
+
     
-    // for (let i = 0; i < weeks.length; i++) {
-    //     const week = weeks[i];
+    
+    for (let i = 0; i < weeks.length; i++) {        
         
-    //     // TODO Comprobar que se guarda con GetDate
-    //     const startDate = week[0].getDate().toLocaleString()
-    //     const endDate = week[week.length - 1].getDate().toLocaleString();
-        
+        const startDate = weeks[i][0].getDate()
+        const endDate = weeks[i][weeks[i].length - 1].getDate()
+        firstandLastDays.push([startDate.toString(), endDate.toString()]);
+    }
 
+    console.log('firstandLastDays: ', firstandLastDays);
 
-    // return weeks;
+    return weeks;
 }

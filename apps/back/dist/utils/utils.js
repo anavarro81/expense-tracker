@@ -45,13 +45,13 @@ const getWeeksInMonth = (month, year) => {
         }
     }
     console.log('weeks: ', weeks);
-    // const firstandLastDays: Date[][] = []
-    // currentWeek = [];
-    // for (let i = 0; i < weeks.length; i++) {
-    //     const week = weeks[i];
-    //     // TODO Comprobar que se guarda con GetDate
-    //     const startDate = week[0].getDate().toLocaleString()
-    //     const endDate = week[week.length - 1].getDate().toLocaleString();
-    // return weeks;
+    const firstandLastDays = [];
+    for (let i = 0; i < weeks.length; i++) {
+        const startDate = weeks[i][0].getDate();
+        const endDate = weeks[i][weeks[i].length - 1].getDate();
+        firstandLastDays.push([startDate.toString(), endDate.toString()]);
+    }
+    console.log('firstandLastDays: ', firstandLastDays);
+    return weeks;
 };
 exports.getWeeksInMonth = getWeeksInMonth;
