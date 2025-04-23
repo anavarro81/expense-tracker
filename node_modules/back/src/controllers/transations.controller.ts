@@ -137,25 +137,98 @@ console.log('Entro en transations.controller.ts')
 // }
 
 
-// export const getTopExpenses = async (req: Request, res: Response): Promise<void> => {
+export const getTopExpenses = async (req: Request, res: Response): Promise<void> => {    
     
-//     console.log('Entro en getTopExpenses')
+    console.log('Entro en getTopExpenses')
+    const {month} = req.params;
+    console.log('month >> ', month)
+
     
-//     try {
+    try {
 
-//         const {month} = req.params;
-        
-//         const result = validateMonth(month)
+        const currentDate = new Date()
+        const currentYear = currentDate.getFullYear()
 
-//         if (result.status === false) {
-//             res.status(400).json({ message: result.message });
-//         }
+        const {month} = req.params;
+        
+        const result = validateMonth(month)
+
+        if (result.status === false) {
+            res.status(400).json({ message: result.message });
+        }
+
+        if (!result.month) {
+            res.status(400).json({ message: 'El mes no es correcto' });
+            return
+        }
 
         
-//     } catch (error) {
+        // Se obtiene el primer y último día del mes indicado
+        const startDate = new Date(currentYear, result.month - 1, 1); // Primer día del mes
+        const endDate = new Date (currentYear, result.month, 0); // Último día del mes
+
+        const total = await TransactionModel.aggregate([
+            {
+                $match: {
+                    date: { $gte: startDate, $lte: endDate },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: "$amount" },
+                },
+            },
+        ])
+
+        const amountTotal = total[0]?.totalAmount || 0
+
+        console.log('amountTotal', amountTotal)
         
-//     }
-// }
+        if (amountTotal === 0) {
+            console.log('No se han encontrado operaciones para el mes indicado')
+            res.status(404).json({ message: 'No se han encontrado operaciones para el mes indicado' });            
+        }
+        
+        // Se obtienen las transacciones del mes indicado, ordenadas por cantidad de forma descendente 
+        // y limitadas a 5 resultados.
+        const transations = await TransactionModel.find({
+            date: { $gte: startDate, $lte: endDate },
+        })
+        .sort({ amount: -1 }) // Ordenar por cantidad de forma descendente
+        .limit(5) // Limitar a los 5 primeros resultados        
+        
+        
+
+        if (transations.length === 0) {
+            console.log('No se han encontrado operaciones para el mes indicado')
+            res.status(404).json({ message: 'No se han encontrado operaciones para el mes indicado' });            
+            
+        }
+
+        const outputTransations = transations.map((transation) => {
+            return {
+                name: transation.name,
+                date: transation.date,
+                percentaje: `${Math.floor(transation.amount / amountTotal * 100)}%`,
+                amount: transation.amount,
+
+            }
+        })
+
+
+        res.status(200).json(outputTransations)
+
+        
+
+        
+    } catch (error) {
+
+        console.log('Error obteniendo transacciones', error);
+        res.status(500).json({ message: 'error obteniendo transacciones', error });
+        
+    }
+}
 
 // export const getTransaction = async (req: Request, res: Response): Promise<void> => {
 //     try {
@@ -194,34 +267,34 @@ console.log('Entro en transations.controller.ts')
 //     }
 // };
 
-// export const loadTransations = async (req: Request, res: Response): Promise<void> => {
-//     try {
+export const loadTransations = async (req: Request, res: Response): Promise<void> => {
+    try {
 
-//         const transactions = req.body;         
+        const transactions = req.body;         
 
-//         const { totalIncomes, totalExpenses } = calculateTotals(transactions);
+        const { totalIncomes, totalExpenses } = calculateTotals(transactions);
 
         
 
-//         await FinancialSummary.findOneAndUpdate(
-//             {}, 
-//             { $inc: { ['total_incomes'] : totalIncomes 
-//                    ,['total_expenses'] : totalExpenses}
-//             }, 
-//             { upsert: true, new: true }
-//         )
+        await FinancialSummary.findOneAndUpdate(
+            {}, 
+            { $inc: { ['total_incomes'] : totalIncomes 
+                   ,['total_expenses'] : totalExpenses}
+            }, 
+            { upsert: true, new: true }
+        )
         
 
-//         const insertedTransation = await TransactionModel.insertMany(req.body);
+        const insertedTransation = await TransactionModel.insertMany(req.body);
 
-//         if (!insertedTransation) {
-//             res.status(404).json({ message: 'Transactions not found' });
-//         }
+        if (!insertedTransation) {
+            res.status(404).json({ message: 'Transactions not found' });
+        }
 
-//         res.status(201).json({ message: 'Transactions: ', insertedTransation });
+        res.status(201).json({ message: 'Transactions: ', insertedTransation });
     
-//     } catch (error) {
-//         console.error('Error inserting transactions:', error);
-//         res.status(500).json({ message: 'Error inserting transactions', error });
-//     }
-// }
+    } catch (error) {
+        console.error('Error inserting transactions:', error);
+        res.status(500).json({ message: 'Error inserting transactions', error });
+    }
+}

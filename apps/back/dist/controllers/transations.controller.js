@@ -8,8 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTransactionsByWeek = void 0;
+exports.loadTransations = exports.getTopExpenses = exports.getTransactionsByWeek = void 0;
+const transations_model_1 = __importDefault(require("../models/transations.model"));
+const financial_summary_model_1 = require("../models/financial_summary.model");
 const utils_1 = require("../utils/utils");
 console.log('Entro en transations.controller.ts');
 // interface GetTxQuery {
@@ -98,17 +103,72 @@ exports.getTransactionsByWeek = getTransactionsByWeek;
 //         res.status(500).json({ message: 'error obteniendo transacciones', error });
 //       }  
 // }
-// export const getTopExpenses = async (req: Request, res: Response): Promise<void> => {
-//     console.log('Entro en getTopExpenses')
-//     try {
-//         const {month} = req.params;
-//         const result = validateMonth(month)
-//         if (result.status === false) {
-//             res.status(400).json({ message: result.message });
-//         }
-//     } catch (error) {
-//     }
-// }
+const getTopExpenses = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    console.log('Entro en getTopExpenses');
+    const { month } = req.params;
+    console.log('month >> ', month);
+    try {
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const { month } = req.params;
+        const result = (0, utils_1.validateMonth)(month);
+        if (result.status === false) {
+            res.status(400).json({ message: result.message });
+        }
+        if (!result.month) {
+            res.status(400).json({ message: 'El mes no es correcto' });
+            return;
+        }
+        // Se obtiene el primer y último día del mes indicado
+        const startDate = new Date(currentYear, result.month - 1, 1); // Primer día del mes
+        const endDate = new Date(currentYear, result.month, 0); // Último día del mes
+        const total = yield transations_model_1.default.aggregate([
+            {
+                $match: {
+                    date: { $gte: startDate, $lte: endDate },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: "$amount" },
+                },
+            },
+        ]);
+        const amountTotal = ((_a = total[0]) === null || _a === void 0 ? void 0 : _a.totalAmount) || 0;
+        console.log('amountTotal', amountTotal);
+        if (amountTotal === 0) {
+            console.log('No se han encontrado operaciones para el mes indicado');
+            res.status(404).json({ message: 'No se han encontrado operaciones para el mes indicado' });
+        }
+        // Se obtienen las transacciones del mes indicado, ordenadas por cantidad de forma descendente 
+        // y limitadas a 5 resultados.
+        const transations = yield transations_model_1.default.find({
+            date: { $gte: startDate, $lte: endDate },
+        })
+            .sort({ amount: -1 }) // Ordenar por cantidad de forma descendente
+            .limit(5); // Limitar a los 5 primeros resultados        
+        if (transations.length === 0) {
+            console.log('No se han encontrado operaciones para el mes indicado');
+            res.status(404).json({ message: 'No se han encontrado operaciones para el mes indicado' });
+        }
+        const outputTransations = transations.map((transation) => {
+            return {
+                name: transation.name,
+                date: transation.date,
+                percentaje: `${Math.floor(transation.amount / amountTotal * 100)}%`,
+                amount: transation.amount,
+            };
+        });
+        res.status(200).json(outputTransations);
+    }
+    catch (error) {
+        console.log('Error obteniendo transacciones', error);
+        res.status(500).json({ message: 'error obteniendo transacciones', error });
+    }
+});
+exports.getTopExpenses = getTopExpenses;
 // export const getTransaction = async (req: Request, res: Response): Promise<void> => {
 //     try {
 //         const { id } = req.params;
@@ -140,24 +200,22 @@ exports.getTransactionsByWeek = getTransactionsByWeek;
 //         res.status(500).json(error);
 //     }
 // };
-// export const loadTransations = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const transactions = req.body;         
-//         const { totalIncomes, totalExpenses } = calculateTotals(transactions);
-//         await FinancialSummary.findOneAndUpdate(
-//             {}, 
-//             { $inc: { ['total_incomes'] : totalIncomes 
-//                    ,['total_expenses'] : totalExpenses}
-//             }, 
-//             { upsert: true, new: true }
-//         )
-//         const insertedTransation = await TransactionModel.insertMany(req.body);
-//         if (!insertedTransation) {
-//             res.status(404).json({ message: 'Transactions not found' });
-//         }
-//         res.status(201).json({ message: 'Transactions: ', insertedTransation });
-//     } catch (error) {
-//         console.error('Error inserting transactions:', error);
-//         res.status(500).json({ message: 'Error inserting transactions', error });
-//     }
-// }
+const loadTransations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const transactions = req.body;
+        const { totalIncomes, totalExpenses } = (0, utils_1.calculateTotals)(transactions);
+        yield financial_summary_model_1.FinancialSummary.findOneAndUpdate({}, { $inc: { ['total_incomes']: totalIncomes,
+                ['total_expenses']: totalExpenses }
+        }, { upsert: true, new: true });
+        const insertedTransation = yield transations_model_1.default.insertMany(req.body);
+        if (!insertedTransation) {
+            res.status(404).json({ message: 'Transactions not found' });
+        }
+        res.status(201).json({ message: 'Transactions: ', insertedTransation });
+    }
+    catch (error) {
+        console.error('Error inserting transactions:', error);
+        res.status(500).json({ message: 'Error inserting transactions', error });
+    }
+});
+exports.loadTransations = loadTransations;

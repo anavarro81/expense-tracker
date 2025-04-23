@@ -1,23 +1,19 @@
 import express from "express";
 import { Request, Response } from 'express';
-// import { 
-//         newTransaction, 
-//         getAllTransactions, 
-//         getTransaction, 
-//         deleteTransactionById, 
-//         loadTransations,
-//         getTransactionsByMonth,
-//         getTransactionsByWeek
-//         } 
-//         from "../controllers/transations.controller";
 
-import { getTransactionsByWeek } from "../controllers/transations.controller";
+
+import { 
+    loadTransations,
+    getTransactionsByWeek, 
+    getTopExpenses } 
+    from "../controllers/transations.controller";
 
 const transactionsRoute = express.Router();
 
 transactionsRoute.get('/', getTransactionsByWeek);
+transactionsRoute.get('/top-expenses/:month', getTopExpenses);
 // transactionsRoute.post("/", newTransaction);
-// transactionsRoute.post("/load-transations", loadTransations);
+transactionsRoute.post("/load-transations", loadTransations);
 
 // transactionsRoute.get("/", getAllTransactions);
 
