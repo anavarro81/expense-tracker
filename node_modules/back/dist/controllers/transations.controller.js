@@ -105,24 +105,29 @@ exports.getTransactionsByWeek = getTransactionsByWeek;
 // }
 const getTopExpenses = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    console.log('Entro en getTopExpenses');
-    const { month } = req.params;
-    console.log('month >> ', month);
     try {
-        const currentDate = new Date();
-        const currentYear = currentDate.getFullYear();
+        const currentYear = new Date().getFullYear();
         const { month } = req.params;
-        const result = (0, utils_1.validateMonth)(month);
-        if (result.status === false) {
-            res.status(400).json({ message: result.message });
-        }
-        if (!result.month) {
-            res.status(400).json({ message: 'El mes no es correcto' });
+        // Validate month
+        let validatedMonth = (0, utils_1.validateMonth)(month);
+        console.log('validatedMonth: ', validatedMonth);
+        if (!validatedMonth || !validatedMonth.month) {
+            res.status(400).json({ message: validatedMonth.message || "El mes no es correcto" });
             return;
         }
+        // Validate currency
+        const currentMonth = validatedMonth.month;
+        // TODO: Por defecto se asume 
+        const validCurrency = (0, utils_1.getCurrencySymbol)("EUR");
+        if (!validCurrency.isOK) {
+            res.status(400).json({ message: 'Divisa no válida' });
+            return;
+        }
+        let currencyCode = validCurrency.currencyCode;
         // Se obtiene el primer y último día del mes indicado
-        const startDate = new Date(currentYear, result.month - 1, 1); // Primer día del mes
-        const endDate = new Date(currentYear, result.month, 0); // Último día del mes
+        const startDate = new Date(currentYear, currentMonth - 1, 1); // Primer día del mes
+        const endDate = new Date(currentYear, currentMonth, 0); // Último día del mes
+        // Calcular total de gastos
         const total = yield transations_model_1.default.aggregate([
             {
                 $match: {
@@ -137,18 +142,16 @@ const getTopExpenses = (req, res) => __awaiter(void 0, void 0, void 0, function*
             },
         ]);
         const amountTotal = ((_a = total[0]) === null || _a === void 0 ? void 0 : _a.totalAmount) || 0;
-        console.log('amountTotal', amountTotal);
         if (amountTotal === 0) {
             console.log('No se han encontrado operaciones para el mes indicado');
             res.status(404).json({ message: 'No se han encontrado operaciones para el mes indicado' });
         }
-        // Se obtienen las transacciones del mes indicado, ordenadas por cantidad de forma descendente 
-        // y limitadas a 5 resultados.
+        // Obtiene las transaciones cinco trasacciones de mayor importe. 
         const transations = yield transations_model_1.default.find({
             date: { $gte: startDate, $lte: endDate },
         })
             .sort({ amount: -1 }) // Ordenar por cantidad de forma descendente
-            .limit(5); // Limitar a los 5 primeros resultados        
+            .limit(5); // Limitar a los 5 primeros resultados                
         if (transations.length === 0) {
             console.log('No se han encontrado operaciones para el mes indicado');
             res.status(404).json({ message: 'No se han encontrado operaciones para el mes indicado' });
@@ -158,7 +161,7 @@ const getTopExpenses = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 name: transation.name,
                 date: transation.date,
                 percentaje: `${Math.floor(transation.amount / amountTotal * 100)}%`,
-                amount: transation.amount,
+                amount: `${currencyCode}${transation.amount} `
             };
         });
         res.status(200).json(outputTransations);

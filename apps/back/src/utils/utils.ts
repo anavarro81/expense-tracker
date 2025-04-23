@@ -79,3 +79,28 @@ export const getWeeksInMonth = (month: number, year: number) => {
 
     return weeks;
 }
+
+export const getCurrencySymbol = (currency: string) => {
+     
+
+    const currencyMap: Record<string, {symbol: string, name: string}> = {
+        EUR: {symbol: '€', name: 'Euro' },
+        USD: {symbol: '$', name: 'Dolar americano' },
+        GBP: {symbol: '£', name: 'Libra inglesa' }
+    }
+
+
+    const {symbol} = currencyMap[currency]
+
+    if(!symbol) {
+        return {'isOK': false, currencyCode: null}        
+    }
+
+    return {'isOK': true, currencyCode: symbol}        
+    
+
+    
+    
+
+}
+
