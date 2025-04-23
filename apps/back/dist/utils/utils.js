@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getWeeksInMonth = exports.validateMonth = exports.calculateTotals = void 0;
+exports.getCurrencySymbol = exports.getWeeksInMonth = exports.validateMonth = exports.calculateTotals = void 0;
 const calculateTotals = (transactions) => {
     let totalIncomes = 0;
     let totalExpenses = 0;
@@ -45,13 +45,26 @@ const getWeeksInMonth = (month, year) => {
         }
     }
     console.log('weeks: ', weeks);
-    // const firstandLastDays: Date[][] = []
-    // currentWeek = [];
-    // for (let i = 0; i < weeks.length; i++) {
-    //     const week = weeks[i];
-    //     // TODO Comprobar que se guarda con GetDate
-    //     const startDate = week[0].getDate().toLocaleString()
-    //     const endDate = week[week.length - 1].getDate().toLocaleString();
-    // return weeks;
+    const firstandLastDays = [];
+    for (let i = 0; i < weeks.length; i++) {
+        const startDate = weeks[i][0].getDate();
+        const endDate = weeks[i][weeks[i].length - 1].getDate();
+        firstandLastDays.push([startDate.toString(), endDate.toString()]);
+    }
+    console.log('firstandLastDays: ', firstandLastDays);
+    return weeks;
 };
 exports.getWeeksInMonth = getWeeksInMonth;
+const getCurrencySymbol = (currency) => {
+    const currencyMap = {
+        EUR: { symbol: '€', name: 'Euro' },
+        USD: { symbol: '$', name: 'Dolar americano' },
+        GBP: { symbol: '£', name: 'Libra inglesa' }
+    };
+    const { symbol } = currencyMap[currency];
+    if (!symbol) {
+        return { 'isOK': false, currencyCode: null };
+    }
+    return { 'isOK': true, currencyCode: symbol };
+};
+exports.getCurrencySymbol = getCurrencySymbol;
