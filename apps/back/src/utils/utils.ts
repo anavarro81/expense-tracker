@@ -1,5 +1,7 @@
 import { parse } from "path";
 
+const months  = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
 
 export const calculateTotals = (transactions: any[]) => {
     let totalIncomes = 0;
@@ -16,7 +18,7 @@ export const calculateTotals = (transactions: any[]) => {
 
 export const validateMonth = (monthRaw: any) => {
 
-    console.log('entro en validateMonth', monthRaw);
+    
 
     if (Array.isArray(monthRaw)) {               
         monthRaw = monthRaw[0]; 
@@ -36,49 +38,7 @@ export const validateMonth = (monthRaw: any) => {
 
 }
 
-export const getWeeksInMonth = (month: number, year: number) => {
-    
-    let firstDayOfMonth = new Date(year, month - 1, 1);
-    
-    
-    
-    
 
-    // Se pide el ultima dia del mes, por lo que se le resta 1 al mes
-    const lastDayOfMonth = new Date(year, month, 0);
-
-    console.log('firstDayOfMonth: ', firstDayOfMonth);
-    console.log('lastDayOfMonth: ', lastDayOfMonth);
-    
-    const weeks: Date[][] = [];
-    let currentWeek: Date[] = [];
-
-    for (let day = firstDayOfMonth; day <= lastDayOfMonth; day.setDate(day.getDate() + 1)) {
-        currentWeek.push(new Date(day));
-        
-        if (currentWeek.length === 7 || day.getDate() === lastDayOfMonth.getDate() || day.getDay() === 0) {
-            weeks.push(currentWeek);
-            currentWeek = [];
-        }
-    }
-
-    console.log('weeks: ', weeks);
-
-    const firstandLastDays: string[][] = []   
-
-    
-    
-    for (let i = 0; i < weeks.length; i++) {        
-        
-        const startDate = weeks[i][0].getDate()
-        const endDate = weeks[i][weeks[i].length - 1].getDate()
-        firstandLastDays.push([startDate.toString(), endDate.toString()]);
-    }
-
-    console.log('firstandLastDays: ', firstandLastDays);
-
-    return weeks;
-}
 
 export const getCurrencySymbol = (currency: string) => {
      
@@ -104,3 +64,63 @@ export const getCurrencySymbol = (currency: string) => {
 
 }
 
+export const getmonthName = (month: number): { monthName: string; monthStart: string } => {
+
+    let monthName = months[month - 1].charAt(0).toUpperCase() + months[month - 1].slice(1); // Capitaliza la primera letra del mes
+    
+        
+
+    const monthStart= monthName.slice(0,3).toUpperCase() 
+
+    
+
+
+    return {monthName, monthStart}
+
+
+}
+
+
+export const getFirstAndLastsDaysOfMonth = (firstDayOfMonth: Date, lastDayOfMonth: Date): number[][] => {
+
+    const days: number[][] = [];
+
+  let day = new Date(firstDayOfMonth);
+  day.setHours(0, 0, 0, 0); // elimina efectos por zonas horarias
+
+  let weekIndex = 0; // índice de la semana actual
+
+  while (day <= lastDayOfMonth) {
+    
+    
+    if (day.getDate() === firstDayOfMonth.getDate() || day.getDay() === 1 || day.getDate() === lastDayOfMonth.getDate() || day.getDay() === 0) {
+      // Si es lunes (1) o primer día del mes, iniciamos una nueva semana
+      
+      if (!days[weekIndex]) {
+        days[weekIndex] = [];
+      }
+
+      days[weekIndex].push(day.getDate());
+
+
+
+      
+    }
+    
+    
+
+    // Si es domingo (0) o último día del mes, cerramos la semana
+    if (day.getDay() === 0 || day.getTime() === lastDayOfMonth.getTime()) {      
+      
+      weekIndex++; // incrementamos el índice de la semana
+    }
+
+    day.setDate(day.getDate() + 1);
+  }
+
+  console.log('days: ', days);  
+
+  return days; // devuelve un array con el primer y último día de cada semana del mes
+  
+
+}

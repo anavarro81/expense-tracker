@@ -12,11 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadTransations = exports.getTopExpenses = exports.getTransactionsByWeek = void 0;
+exports.newTransaction = exports.loadTransations = exports.getTopExpenses = exports.getTransactionsByWeek = void 0;
 const transations_model_1 = __importDefault(require("../models/transations.model"));
 const financial_summary_model_1 = require("../models/financial_summary.model");
+const expenseService_1 = require("../services/expenseService");
 const utils_1 = require("../utils/utils");
-console.log('Entro en transations.controller.ts');
 // interface GetTxQuery {
 //     // Obligamos a que month sea un string
 //     month: string;
@@ -26,8 +26,8 @@ console.log('Entro en transations.controller.ts');
 const getTransactionsByWeek = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Entro en getTransactionsByWeek');
     try {
-        // const {month} = req.params;
-        const weeksOfMonth = (0, utils_1.getWeeksInMonth)(3, 2025);
+        let { month } = req.params;
+        const weeks = (0, expenseService_1.getTransationsInMonth)(month, 2025);
         res.status(200).json({ message: 'Todo OK' });
     }
     catch (error) {
@@ -35,74 +35,6 @@ const getTransactionsByWeek = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.getTransactionsByWeek = getTransactionsByWeek;
-// export const newTransaction = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const newTransaction = new TransactionModel(req.body);
-//         await newTransaction.save();
-//         // Como solo hay un registo en la coleccion FinancialSummary, no es necesario filtrar por id se indica {}
-//         // upsert: true (insert if not exists) y new: true (return the updated document)
-//         // El operador: $inc incrementa el valor de un campo en un documento.
-//         const field = newTransaction.type === 'Ingreso' ? 'total_incomes' : 'total_expenses';
-//         await   FinancialSummary.findOneAndUpdate(
-//         {}, 
-//         { $inc: { [field]: newTransaction.amount } }, 
-//         { upsert: true })
-//         res.status(201).json({ message: 'Transaction created successfully', newTransaction });
-//     } catch (error) {
-//         console.log('Error creating Transaction', error);
-//         res.status(500).json({ message: 'Error creating Transaction', error });
-//     }
-// };
-// export const getAllTransactions = async (
-//     req: Request<{}, any, any, GetTxQuery>, 
-//     res: Response)
-//     : Promise<void> => {
-//     console.log('Entro en getAllTransactions')
-//     try {
-//         let monthRaw = req.query.month
-//         const result = validateMonth(monthRaw)
-//         if (result.status === false) {
-//             res.status(400).json({ message: result.message });
-//         }
-//        const transactions = await TransactionModel.find(
-//             { $expr: {
-//                 $eq: [{ $month: "$date" }, result.month] // Filtrar por el mes
-//             }
-//         })
-//         .sort({ date: req.query.sort === 'asc' ? 1 : -1 })
-//         if (transactions.length === 0) {
-//             res.status(404).json({ message: 'Transactions not found' });
-//         }
-//         res.status(200).json({ message: 'Transactions: ', transactions });
-//     } catch (error) {
-//         console.log('Error getting Transactions', error);
-//         res.status(500).json({ message: 'Error getting Transactions', error });
-//     }
-// };
-// export const getTransactionsByMonth = async (req: Request, res: Response): Promise<void> => {
-//       try {               
-//         console.log('req.query', req.query)
-//         getWeeksInMonth(3, 2025)
-//         // const {month} = req.params;
-//         // const result = validateMonth(month)
-//         // if (result.status === false) {
-//         //     res.status(400).json({ message: result.message });
-//         // }
-//         // const transactions = await TransactionModel.find(
-//         //     { $expr: {
-//         //         $eq: [{ $month: "$date" }, result.month] // Filtrar por el mes
-//         //     }
-//         // });
-//         // if (!transactions) {
-//         //     res.status(204).json({ message: 'No se han encontrado operaciones para el mes indicado' });
-//         // }
-//         // res.status(200).json({ message: 'Transactions: ', transactions });
-//         res.status(200).json({ message: 'Todo OK'});
-//       } catch (error) {
-//         console.log('Error obteniendo transacciones', error);
-//         res.status(500).json({ message: 'error obteniendo transacciones', error });
-//       }  
-// }
 const getTopExpenses = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -222,3 +154,20 @@ const loadTransations = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.loadTransations = loadTransations;
+const newTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newTransaction = new transations_model_1.default(req.body);
+        yield newTransaction.save();
+        // Como solo hay un registo en la coleccion FinancialSummary, no es necesario filtrar por id se indica {}
+        // upsert: true (insert if not exists) y new: true (return the updated document)
+        // El operador: $inc incrementa el valor de un campo en un documento.
+        const field = newTransaction.type === 'Ingreso' ? 'total_incomes' : 'total_expenses';
+        yield financial_summary_model_1.FinancialSummary.findOneAndUpdate({}, { $inc: { [field]: newTransaction.amount } }, { upsert: true });
+        res.status(201).json({ message: 'Transaction created successfully', newTransaction });
+    }
+    catch (error) {
+        console.log('Error creating Transaction', error);
+        res.status(500).json({ message: 'Error creating Transaction', error });
+    }
+});
+exports.newTransaction = newTransaction;

@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import TransactionModel from '../models/transations.model';
 import { FinancialSummary } from '../models/financial_summary.model';
-import {calculateTotals, validateMonth, getWeeksInMonth, getCurrencySymbol} from '../utils/utils';
+import {getTransationsInMonth} from '../services/expenseService';
+import {calculateTotals, validateMonth, getCurrencySymbol} from '../utils/utils';
 
-console.log('Entro en transations.controller.ts')
+
 
 
 // interface GetTxQuery {
@@ -19,10 +20,10 @@ console.log('Entro en transations.controller.ts')
     
     try {
         
-        // const {month} = req.params;
+        let {month} = req.params;     
 
+        const weeks= getTransationsInMonth(month, 2025)
 
-        const weeksOfMonth = getWeeksInMonth(3, 2025)
 
         res.status(200).json({ message: 'Todo OK'});
         
@@ -32,109 +33,7 @@ console.log('Entro en transations.controller.ts')
 }
 
 
-// export const newTransaction = async (req: Request, res: Response): Promise<void> => {
-//     try {
-        
-//         const newTransaction = new TransactionModel(req.body);
-//         await newTransaction.save();
 
-
-//         // Como solo hay un registo en la coleccion FinancialSummary, no es necesario filtrar por id se indica {}
-//         // upsert: true (insert if not exists) y new: true (return the updated document)
-//         // El operador: $inc incrementa el valor de un campo en un documento.
-
-
-
-//         const field = newTransaction.type === 'Ingreso' ? 'total_incomes' : 'total_expenses';
-        
-//         await   FinancialSummary.findOneAndUpdate(
-//         {}, 
-//         { $inc: { [field]: newTransaction.amount } }, 
-//         { upsert: true })
-
-
-//         res.status(201).json({ message: 'Transaction created successfully', newTransaction });
-//     } catch (error) {
-//         console.log('Error creating Transaction', error);
-//         res.status(500).json({ message: 'Error creating Transaction', error });
-//     }
-// };
-
-// export const getAllTransactions = async (
-//     req: Request<{}, any, any, GetTxQuery>, 
-//     res: Response)
-//     : Promise<void> => {
-    
-//     console.log('Entro en getAllTransactions')
-        
-//     try {
-
-//         let monthRaw = req.query.month
-
-//         const result = validateMonth(monthRaw)
-
-//         if (result.status === false) {
-//             res.status(400).json({ message: result.message });
-//         }
-
-//        const transactions = await TransactionModel.find(
-//             { $expr: {
-//                 $eq: [{ $month: "$date" }, result.month] // Filtrar por el mes
-//             }
-//         })
-//         .sort({ date: req.query.sort === 'asc' ? 1 : -1 })
-        
-
-        
-        
-//         if (transactions.length === 0) {
-//             res.status(404).json({ message: 'Transactions not found' });
-//         }
-//         res.status(200).json({ message: 'Transactions: ', transactions });
-//     } catch (error) {
-//         console.log('Error getting Transactions', error);
-//         res.status(500).json({ message: 'Error getting Transactions', error });
-//     }
-// };
-
-// export const getTransactionsByMonth = async (req: Request, res: Response): Promise<void> => {
-
-//       try {               
-        
-
-//         console.log('req.query', req.query)
-
-//         getWeeksInMonth(3, 2025)
-
-//         // const {month} = req.params;
-        
-//         // const result = validateMonth(month)
-
-//         // if (result.status === false) {
-//         //     res.status(400).json({ message: result.message });
-//         // }
-
-//         // const transactions = await TransactionModel.find(
-//         //     { $expr: {
-//         //         $eq: [{ $month: "$date" }, result.month] // Filtrar por el mes
-//         //     }
-//         // });
-
-//         // if (!transactions) {
-//         //     res.status(204).json({ message: 'No se han encontrado operaciones para el mes indicado' });
-            
-//         // }
-
-//         // res.status(200).json({ message: 'Transactions: ', transactions });
-//         res.status(200).json({ message: 'Todo OK'});
-
-        
-//       } catch (error) {
-//         console.log('Error obteniendo transacciones', error);
-//         res.status(500).json({ message: 'error obteniendo transacciones', error });
-//       }  
-
-// }
 
 
 export const getTopExpenses = async (req: Request, res: Response): Promise<void> => {    
@@ -307,3 +206,31 @@ export const loadTransations = async (req: Request, res: Response): Promise<void
         res.status(500).json({ message: 'Error inserting transactions', error });
     }
 }
+
+export const newTransaction = async (req: Request, res: Response): Promise<void> => {
+    try {
+        
+        const newTransaction = new TransactionModel(req.body);
+        await newTransaction.save();
+
+
+        // Como solo hay un registo en la coleccion FinancialSummary, no es necesario filtrar por id se indica {}
+        // upsert: true (insert if not exists) y new: true (return the updated document)
+        // El operador: $inc incrementa el valor de un campo en un documento.
+
+
+
+        const field = newTransaction.type === 'Ingreso' ? 'total_incomes' : 'total_expenses';
+        
+        await   FinancialSummary.findOneAndUpdate(
+        {}, 
+        { $inc: { [field]: newTransaction.amount } }, 
+        { upsert: true })
+
+
+        res.status(201).json({ message: 'Transaction created successfully', newTransaction });
+    } catch (error) {
+        console.log('Error creating Transaction', error);
+        res.status(500).json({ message: 'Error creating Transaction', error });
+    }
+};
