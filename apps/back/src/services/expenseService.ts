@@ -13,22 +13,22 @@ export const getTransationsInMonth = async (month: string, year: number) => {
   // Obtiene el mes y su abreviatura con tres letras
   const {monthName, monthStart} = getmonthName(monthNumber)
 
-  console.log('monthName, monthStart: ', monthName, monthStart);
+  
   
   // Obtiene un array con el primer y último día de cada semana del mes
   const firstAndLastDays = getFirstAndLastsDaysOfMonth(firstDayOfMonth, lastDayOfMonth)
 
-  console.log('firstAndLastDays: ', firstAndLastDays);
+  
   
 
   const totalExpenses = await getTotalAmountByMonth(monthNumber, 2025)
 
-  console.log('totalExpenses: ', totalExpenses);
+  
   
   
   const transations = await getAmountsByWeek(monthNumber, year)
 
-  console.log('transations: ', transations);
+  
   
   const weeklyExpense = transations.map((transation, index) => {
 
@@ -43,7 +43,9 @@ export const getTransationsInMonth = async (month: string, year: number) => {
 
   })
 
-  console.log('weeklyExpense: ', weeklyExpense);
+  
+
+  return weeklyExpense
   
   
 
@@ -86,7 +88,7 @@ export const getAmountsByWeek = async (month: number, year: number) => {
 
 }
 
-
+// Devuelve el saldo final de un mes. 
 export const getTotalAmountByMonth = async (month: number, year: number) => {
 
     // Obtiene el gasto total del mes. 

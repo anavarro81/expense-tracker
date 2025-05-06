@@ -67,7 +67,6 @@ const getFirstAndLastsDaysOfMonth = (firstDayOfMonth, lastDayOfMonth) => {
         }
         day.setDate(day.getDate() + 1);
     }
-    console.log('days: ', days);
     return days; // devuelve un array con el primer y último día de cada semana del mes
 };
 exports.getFirstAndLastsDaysOfMonth = getFirstAndLastsDaysOfMonth;

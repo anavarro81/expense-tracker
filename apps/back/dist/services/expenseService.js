@@ -21,14 +21,10 @@ const getTransationsInMonth = (month, year) => __awaiter(void 0, void 0, void 0,
     const lastDayOfMonth = new Date(year, monthNumber, 0);
     // Obtiene el mes y su abreviatura con tres letras
     const { monthName, monthStart } = (0, utils_1.getmonthName)(monthNumber);
-    console.log('monthName, monthStart: ', monthName, monthStart);
     // Obtiene un array con el primer y último día de cada semana del mes
     const firstAndLastDays = (0, utils_1.getFirstAndLastsDaysOfMonth)(firstDayOfMonth, lastDayOfMonth);
-    console.log('firstAndLastDays: ', firstAndLastDays);
     const totalExpenses = yield (0, exports.getTotalAmountByMonth)(monthNumber, 2025);
-    console.log('totalExpenses: ', totalExpenses);
     const transations = yield (0, exports.getAmountsByWeek)(monthNumber, year);
-    console.log('transations: ', transations);
     const weeklyExpense = transations.map((transation, index) => {
         return {
             week: monthStart + ` S` + (index + 1),
@@ -37,7 +33,7 @@ const getTransationsInMonth = (month, year) => __awaiter(void 0, void 0, void 0,
             percentage: ((transation.totalAmount / totalExpenses) * 100).toFixed(0) + '%' // porcentaje del gasto de la semana respecto al total del mes
         };
     });
-    console.log('weeklyExpense: ', weeklyExpense);
+    return weeklyExpense;
 });
 exports.getTransationsInMonth = getTransationsInMonth;
 // Obtiene el gasto agupado pr semana del mes
@@ -69,6 +65,7 @@ const getAmountsByWeek = (month, year) => __awaiter(void 0, void 0, void 0, func
     return transations;
 });
 exports.getAmountsByWeek = getAmountsByWeek;
+// Devuelve el saldo final de un mes. 
 const getTotalAmountByMonth = (month, year) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     // Obtiene el gasto total del mes. 

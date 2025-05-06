@@ -12,29 +12,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newTransaction = exports.loadTransations = exports.getTopExpenses = exports.getTransactionsByWeek = void 0;
+exports.getAllTransactionsByMonth = exports.newTransaction = exports.loadTransations = exports.getTopExpenses = exports.getTransactionsByWeek = void 0;
 const transations_model_1 = __importDefault(require("../models/transations.model"));
 const financial_summary_model_1 = require("../models/financial_summary.model");
 const expenseService_1 = require("../services/expenseService");
 const utils_1 = require("../utils/utils");
-// interface GetTxQuery {
-//     // Obligamos a que month sea un string
-//     month: string;
-//     sort?: 'asc' | 'desc';
-//     limit?: string;
-//   }
+// Obtiene el gasto agrupado por semana del mes 
 const getTransactionsByWeek = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Entro en getTransactionsByWeek');
     try {
         let { month } = req.params;
-        const weeks = (0, expenseService_1.getTransationsInMonth)(month, 2025);
-        res.status(200).json({ message: 'Todo OK' });
+        const expensesbyWeeok = yield (0, expenseService_1.getTransationsInMonth)(month, 2025);
+        res.status(200).json(expensesbyWeeok);
     }
     catch (error) {
         res.status(500).json({ message: 'error obteniendo transacciones', error });
     }
 });
 exports.getTransactionsByWeek = getTransactionsByWeek;
+// Obtiene los mayores gastos del mes indicado. 
 const getTopExpenses = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -104,37 +99,6 @@ const getTopExpenses = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getTopExpenses = getTopExpenses;
-// export const getTransaction = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const { id } = req.params;
-//         const selectedTransaction = await TransactionModel.findById(id);
-//         if (!selectedTransaction) {
-//             res.status(404).json({ message: `No se encontró Transaction con id: ${id}` });
-//         }
-//         res.status(200).json(selectedTransaction);
-//     } catch (error) {
-//         res.status(500).json(error);
-//     }
-// };
-// export const deleteTransactionById = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const { id } = req.params;
-//         const deletedTransaction = await TransactionModel.findByIdAndDelete(id);
-//         if (!deletedTransaction) {
-//             res.status(404).json({ message: "este id no existe" });
-//             return
-//         }
-//         await FinancialSummary.findOneAndUpdate(
-//             {}, 
-//             { $inc: { [deletedTransaction.type === 'Ingreso' ? 'total_incomes' : 'total_expenses']: -deletedTransaction.amount } }, 
-//             { upsert: true, new: true }
-//         )
-//         res.status(200).json(deletedTransaction);
-//     } catch (error) {
-//         console.log('error', error);
-//         res.status(500).json(error);
-//     }
-// };
 const loadTransations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const transactions = req.body;
@@ -171,3 +135,30 @@ const newTransaction = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.newTransaction = newTransaction;
+const getAllTransactionsByMonth = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('getAllTransactionsByMonth >> ', req.params.month);
+    try {
+        const result = (0, utils_1.validateMonth)(req.params.month);
+        if (!result.status) {
+            res.status(400).json({ message: result.message });
+            return;
+        }
+        if (!result.month) {
+            res.status(400).json({ message: 'month not found' });
+            return;
+        }
+        const transations = yield transations_model_1.default.find({
+            date: {
+                $gte: new Date(2025, result.month - 1, 1),
+                $lt: new Date(2025, result.month, 1),
+            },
+        });
+        console.log('transations >> ', transations);
+        res.status(200).json(transations);
+    }
+    catch (error) {
+        console.log('Error creating Transaction', error);
+        res.status(500).json({ message: 'Error creating Transaction', error });
+    }
+});
+exports.getAllTransactionsByMonth = getAllTransactionsByMonth;

@@ -5,27 +5,20 @@ import {getTransationsInMonth} from '../services/expenseService';
 import {calculateTotals, validateMonth, getCurrencySymbol} from '../utils/utils';
 
 
-
-
-// interface GetTxQuery {
-//     // Obligamos a que month sea un string
-//     month: string;
-//     sort?: 'asc' | 'desc';
-//     limit?: string;
-//   }
+  // Obtiene el gasto agrupado por semana del mes 
 
   export const getTransactionsByWeek = async (req: Request, res: Response): Promise<void> => {
     
-    console.log('Entro en getTransactionsByWeek')
+    
     
     try {
         
         let {month} = req.params;     
 
-        const weeks= getTransationsInMonth(month, 2025)
+        const expensesbyWeeok= await getTransationsInMonth(month, 2025)
 
 
-        res.status(200).json({ message: 'Todo OK'});
+        res.status(200).json(expensesbyWeeok);
         
     } catch (error) {
         res.status(500).json({ message: 'error obteniendo transacciones', error });
@@ -34,7 +27,7 @@ import {calculateTotals, validateMonth, getCurrencySymbol} from '../utils/utils'
 
 
 
-
+// Obtiene los mayores gastos del mes indicado. 
 
 export const getTopExpenses = async (req: Request, res: Response): Promise<void> => {    
     
@@ -138,42 +131,7 @@ export const getTopExpenses = async (req: Request, res: Response): Promise<void>
     }
 }
 
-// export const getTransaction = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const { id } = req.params;
-//         const selectedTransaction = await TransactionModel.findById(id);
-//         if (!selectedTransaction) {
-//             res.status(404).json({ message: `No se encontró Transaction con id: ${id}` });
-//         }
-//         res.status(200).json(selectedTransaction);
-//     } catch (error) {
-//         res.status(500).json(error);
-//     }
-// };
 
-// export const deleteTransactionById = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const { id } = req.params;
-        
-//         const deletedTransaction = await TransactionModel.findByIdAndDelete(id);
-        
-//         if (!deletedTransaction) {
-//             res.status(404).json({ message: "este id no existe" });
-//             return
-//         }
-
-//         await FinancialSummary.findOneAndUpdate(
-//             {}, 
-//             { $inc: { [deletedTransaction.type === 'Ingreso' ? 'total_incomes' : 'total_expenses']: -deletedTransaction.amount } }, 
-//             { upsert: true, new: true }
-//         )
-        
-//         res.status(200).json(deletedTransaction);
-//     } catch (error) {
-//         console.log('error', error);
-//         res.status(500).json(error);
-//     }
-// };
 
 export const loadTransations = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -234,3 +192,41 @@ export const newTransaction = async (req: Request, res: Response): Promise<void>
         res.status(500).json({ message: 'Error creating Transaction', error });
     }
 };
+
+export const getAllTransactionsByMonth  = async (req: Request, res: Response): Promise<void> => {
+
+    console.log('getAllTransactionsByMonth >> ', req.params.month);
+    
+
+    try {
+
+        const result = validateMonth(req.params.month)
+
+        if (!result.status) {
+            res.status(400).json({ message: result.message });
+            return
+        }
+
+        if (!result.month) {
+            res.status(400).json({ message: 'month not found' });
+            return
+        }
+
+        const transations = await TransactionModel.find({
+            date: {
+                $gte: new Date(2025, result.month - 1, 1),
+                $lt: new Date(2025, result.month, 1),
+            },
+        })
+        
+        console.log('transations >> ', transations);
+
+        res.status(200).json(transations);
+        
+    } catch (error) {
+        console.log('Error creating Transaction', error);
+        res.status(500).json({ message: 'Error creating Transaction', error });
+
+    }
+
+}
