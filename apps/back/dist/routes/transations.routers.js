@@ -6,16 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const transations_controller_1 = require("../controllers/transations.controller");
 const transactionsRoute = express_1.default.Router();
-transactionsRoute.get('/', transations_controller_1.getTransactionsByWeek);
+transactionsRoute.get('/:month', transations_controller_1.getAllTransactionsByMonth);
 transactionsRoute.get('/top-expenses/:month', transations_controller_1.getTopExpenses);
+transactionsRoute.get('/monthly-expenses/:month', transations_controller_1.getTransactionsByWeek);
 // transactionsRoute.post("/", newTransaction);
 transactionsRoute.post("/load-transations", transations_controller_1.loadTransations);
-// transactionsRoute.get("/", getAllTransactions);
-// transactionsRoute.get("/month", (req: Request, res: Response) => {
-//     console.log('Error en la ruta de mes')
-//     res.status(400).json({ message: "Mes no informado" });
-// });
-// transactionsRoute.get("/month/:month", getTransactionsByMonth);
-// transactionsRoute.get("/month/:month", getTransactionsByMonth);
-// transactionsRoute.get("/:id", getTransaction);
 exports.default = transactionsRoute;
